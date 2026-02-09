@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "https://remote-connect.IshitaBadole.me/static/css/main.d9cf6f27.chunk.css",
+    "main.js": "https://remote-connect.IshitaBadole.me/static/js/main.8d9f3e97.chunk.js",
+    "main.js.map": "https://remote-connect.IshitaBadole.me/static/js/main.8d9f3e97.chunk.js.map",
+    "runtime-main.js": "https://remote-connect.IshitaBadole.me/static/js/runtime-main.2385202d.js",
+    "runtime-main.js.map": "https://remote-connect.IshitaBadole.me/static/js/runtime-main.2385202d.js.map",
+    "static/js/2.da2bda53.chunk.js": "https://remote-connect.IshitaBadole.me/static/js/2.da2bda53.chunk.js",
+    "static/js/2.da2bda53.chunk.js.map": "https://remote-connect.IshitaBadole.me/static/js/2.da2bda53.chunk.js.map",
+    "static/js/3.10a1d880.chunk.js": "https://remote-connect.IshitaBadole.me/static/js/3.10a1d880.chunk.js",
+    "static/js/3.10a1d880.chunk.js.map": "https://remote-connect.IshitaBadole.me/static/js/3.10a1d880.chunk.js.map",
+    "index.html": "https://remote-connect.IshitaBadole.me/index.html",
+    "static/css/main.d9cf6f27.chunk.css.map": "https://remote-connect.IshitaBadole.me/static/css/main.d9cf6f27.chunk.css.map",
+    "static/js/2.da2bda53.chunk.js.LICENSE.txt": "https://remote-connect.IshitaBadole.me/static/js/2.da2bda53.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2385202d.js",
+    "static/js/2.da2bda53.chunk.js",
+    "static/css/main.d9cf6f27.chunk.css",
+    "static/js/main.8d9f3e97.chunk.js"
+  ]
+}
