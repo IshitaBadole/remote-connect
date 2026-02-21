@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { supabase } from './supabaseClient'
+import { useEffect, useState } from 'react';
+import { supabase } from './supabaseClient';
 
 export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
+  const [data, setData] = useState("");
 
   const handleLogin = async (email) => {
     try {
@@ -19,9 +20,15 @@ export default function Auth() {
     } catch (error) {
       alert(error.error_description || error.message)
     } finally {
-      setLoading(false)
+      setLoading(false)``
     }
   }
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/data")
+      .then(res => res.json())
+      .then(data => setData(data.message));
+  }, []);
 
   return (
     <div className="row flex flex-center">
@@ -49,6 +56,7 @@ export default function Auth() {
             {loading ? <span>Loading</span> : <span>Send magic link</span>}
           </button>
         </div>
+        <div>Backend says: {data}</div>
       </div>
     </div>
   )

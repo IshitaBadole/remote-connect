@@ -20,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x] # We will deploy with only one version of node
+        node-version: [20.x] # We will deploy with only one version of node
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -34,22 +34,27 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
 
       - name: npm ci, build and test
         run: |
           npm ci
           npm run build --if-present
           npm test
+        working-directory: ./frontend
         env:
           # PUBLIC_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           PUBLIC_URL: https://${{ github.event.repository.name }}.${{ github.repository_owner }}.me/
           SKIP_PREFLIGHT_CHECK: true
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
-          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          # Point this to your live FastAPI URL once deployed
+          # REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./build
+          publish_dir: ./frontend/build

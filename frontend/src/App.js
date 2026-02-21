@@ -1,5 +1,5 @@
-import './index.css'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react';
+import './index.css';
 import { supabase } from './supabaseClient'
 import Auth from './Auth'
 import Account from './Account'
@@ -22,4 +22,13 @@ export default function Home() {
       {!session ? <Auth /> : <Account key={session.user.id} session={session} />}
     </div>
   )
+  // const [data, setData] = useState("");
+
+  // useEffect(() => {
+  //   fetch("http://localhost:8000/api/data")
+  //     .then(res => res.json())
+  //     .then(data => setData(data.message));
+  // }, []);
+
+  // return <div>Backend says: {data}</div>;
 }
