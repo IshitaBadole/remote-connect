@@ -1,23 +1,33 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/frontend/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
+# --- IDEs & General ---
+.vscode/
+.idea/
+*.swp
+*.log
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# --- Backend (FastAPI / Python) ---
+backend/__pycache__/
+backend/*.pyc
+backend/venv/
+backend/env/
+
+# --- Frontend (Flutter) ---
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/build/
+frontend/ios/Flutter/ephemeral/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/*.jks
+
+# --- Legacy Frontend (React / Node) ---
+frontend_legacy/node_modules/
+frontend_legacy/.cache/
+frontend_legacy/build/
+
+# Ignore all env files in any subdirectory
+.env
+.env.*
+!.env.example
