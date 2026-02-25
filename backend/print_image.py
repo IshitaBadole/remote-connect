@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 # TODO: move constants outside functions
 
 
-def resize_img(img: Image.Image, size: int = 300, centering: float = 0.5):
+def resize_img(img: Image.Image, size: int = 360, centering: float = 0.5):
     """
     Crop image around its center to a 1:1 aspect ratio of the given size
     """
@@ -56,7 +56,7 @@ def create_polaroid(img: Image.Image, text: str | None = None) -> Image.Image:
     )
 
     if text:
-        font_size = 10
+        font_size = 20
         try:
             font = ImageFont.truetype("arial.ttf", font_size)
         except:
