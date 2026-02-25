@@ -159,3 +159,40 @@ create policy "Anyone can upload an avatar."
 - [@jlumbroso](https://www.github.com/jlumbroso)
 
 Supabase is open source. We'd love for you to follow along and get involved at https://github.com/supabase/supabase
+
+1. Identify the Printer Logic
+Ensure your printing script is wrapped in a function that FastAPI can call. If your script uses python-escpos, it should look something like this:
+Action: Open your print script and wrap the logic in def print_now(image_path, description):.
+2. Configure USB Permissions (Udev)
+On Linux (Raspberry Pi), a standard user doesn't have permission to write to USB devices. If you don't do this, FastAPI will throw a "Permission Denied" error.
+Action: Run lsusb to find your idVendor and idProduct.
+Action: Create a rule: sudo nano /etc/udev/rules.d/99-printer.rules.
+Action: Add: SUBSYSTEM=="usb", ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", MODE="0666".
+Action: Reload: sudo udevadm control --reload-rules && sudo udevadm trigger. [Source: python-escpos Documentation]
+3. Integrate with FastAPI
+Update your main.py to call the printing function immediately after the file is saved.
+Action: Import your print function: from printer_script import print_now.
+Action: Update the /upload route:
+python
+@app.post("/upload")
+async def upload_memory(description: str = Form(...), file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # TRIGGER THE PRINTER
+    print_now(file_path, description) 
+
+    return {"status": "Printed!"}
+Use code with caution.
+
+4. Deploy on the Pi
+Since you are moving from Mac to Pi, you need a fresh environment.
+Action: Clone the repo: git clone <your-repo-url>.
+Action: Create a virtual environment: python3 -m venv venv.
+Action: Install dependencies: source venv/bin/activate && pip install fastapi uvicorn python-multipart python-escpos.
+Action: Run the server: python3 main.py (Ensure host="0.0.0.0" is set in your if __name__ == "__main__": block).
+5. Update the iPad "Target"
+Your iPad needs to know the Pi's specific "name" on the network.
+Action: Find Pi IP: hostname -I.
+Action: In Flutter, update the Uri.parse: http://<PI_IP_ADDRESS>:8000/upload.

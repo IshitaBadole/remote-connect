@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/form_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -70,35 +70,65 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
   final _emailController = TextEditingController();
+  final _otpController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     // This "listens" for the Magic Link click from the email
     supabase.auth.onAuthStateChange.listen((data) {
-      if (data.session != null) {
-        // SUCCESS! The Intent Filter worked. Move to the Library.
-        print("Logged in! Redirecting...");
+      if(!mounted) return;
+
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      // 1. Only transition if we have a session AND it's a 'Login' or 'Initial' event
+      if (session != null &&
+          (event == AuthChangeEvent.signedIn ||
+              event == AuthChangeEvent.initialSession)) {
+        // 2. Use pushReplacement so they can't 'Go Back' to the login screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const UploadPage()),
+        );
+      } else if (event == AuthChangeEvent.signedOut) {
+        // 3. If they log out, wipe the screen and go back to Login
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const MyHomePage(title: 'Flutter Demo Home Page'),
+          ),
+          (route) => false,
+        );
       }
     });
   }
 
-  Future<void> _sendMagicLink() async {
+  // 1. Add a boolean to track if the code was sent
+  bool _codeSent = false;
+
+  Future<void> _handleAuth() async {
     setState(() => _isLoading = true);
     try {
-      final String redirectUrl = kIsWeb
-          ? 'http://localhost:53441/' // Replace with your web port
-          : 'io.supabase.remote-connect://login-callback/';
-      // 3. This triggers the email to be sent
-      await supabase.auth.signInWithOtp(
-        email: _emailController.text.trim(),
-        emailRedirectTo: redirectUrl,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Check your email for the magic link!')),
+      if (!_codeSent) {
+        // STEP 1: SEND THE CODE
+        await supabase.auth.signInWithOtp(email: _emailController.text.trim());
+        setState(() => _codeSent = true); // Now show the OTP input field
+      } else {
+        // STEP 2: VERIFY THE CODE typed by the user
+        await supabase.auth.verifyOTP(
+          email: _emailController.text.trim(),
+          token: _otpController.text.trim(),
+          type: OtpType.magiclink, // Use 'magiclink' even for codes
         );
+        // The 'onAuthStateChange' listener you wrote earlier will
+        // automatically catch the success and redirect to the dummy page!
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -114,31 +144,39 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Enter your email to sign in:',
-                style: TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                style: const TextStyle(
-                  fontSize: 18,
-                ), // Senior-friendly text size
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [
-                  AutofillHints.email,
-                ], // Autofills from phone memory
-              ),
-              const SizedBox(height: 24),
+              if (!_codeSent) ...[
+                const Text("Enter your email:", style: TextStyle(fontSize: 22)),
+                TextField(
+                  controller: _emailController,
+                  style: TextStyle(fontSize: 20),
+                ),
+              ] else ...[
+                const Text(
+                  "Enter the 6-digit code from your email:",
+                  style: TextStyle(fontSize: 22),
+                ),
+                TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(
+                    fontSize: 30,
+                    letterSpacing: 10,
+                  ), // Big numbers!
+                  decoration: InputDecoration(hintText: "000000"),
+                ),
+              ],
+              const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _isLoading ? null : _sendMagicLink,
+                onPressed: _isLoading ? null : _handleAuth,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(200, 60),
-                ), // Big button
+                  minimumSize: Size(double.infinity, 70),
+                ),
                 child: _isLoading
                     ? const CircularProgressIndicator()
-                    : const Text('Send Magic Link'),
+                    : Text(
+                        _codeSent ? 'Verify Code' : 'Send Code',
+                        style: TextStyle(fontSize: 22),
+                      ),
               ),
             ],
           ),

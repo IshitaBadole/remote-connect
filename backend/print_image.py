@@ -1,4 +1,6 @@
+import os
 import string
+from pathlib import Path
 
 from escpos.printer import Usb
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -77,34 +79,56 @@ def create_polaroid(img: Image.Image, text: str | None = None) -> Image.Image:
 VENDOR_ID = 0x0485
 PRODUCT_ID = 0x5741
 
-img = Image.open("people.jpg")
-print(f"Image size: {img.size}")
-text = "".join([f"{c}" for c in string.ascii_letters])
-text += "\n"
-# font size = 10 can fit 7 lines, 52 letters each line
-# font size = 14 can fit 5 lines, 39 letters each lines
-num_lines = 5
-full_text = "".join([(f"{text}") for i in range(num_lines)])
-output_image_path = "people_polaroid.jpg"
+def print_image(file_path):
 
-save_image = True
-print_image = False
+    if not file_path:
+        img = Image.open("static/people.jpg")
+    else:
+        img = Image.open(file_path)
+    print(f"Image size: {img.size}")
+    text = "".join([f"{c}" for c in string.ascii_letters])
+    text += "\n"
+    # font size = 10 can fit 7 lines, 52 letters each line
+    # font size = 14 can fit 5 lines, 39 letters each lines
+    num_lines = 5
+    full_text = "".join([(f"{text}") for i in range(num_lines)])
 
-img = resize_img(img)
-frame = create_polaroid(img, full_text)
+    save_image = True
+    print_image = False
 
-if save_image:
-    frame.save(output_image_path)
-    print(f"Polaroid saved to {output_image_path}")
+    img = resize_img(img)
+    if not file_path:
+        frame = create_polaroid(img, full_text)
+    else:
+        file_path = Path(f"{file_path}.txt")
+        caption = file_path.read_text()
+        frame = create_polaroid(img, caption)
 
-if print_image:
-    p = Usb(VENDOR_ID, PRODUCT_ID)
-    # Print
-    p.image(frame, center=True)
+    if save_image:
+        if not file_path:
+            output_image_path = "output/people_polaroid.jpg"
+        else:
+            file_name = Path(file_path).stem
+            output_image_path = f"output/{file_name}_polaroid.jpg"
+        directory = os.path.dirname(output_image_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
 
-    try:
-        p.cut()
-    except Exception as e:
-        print(f"Cutting the paper is not supported: {e}")
+        frame.save(output_image_path)
+        print(f"Polaroid saved to {output_image_path}")
 
-    p.close()
+    if print_image:
+        p = Usb(VENDOR_ID, PRODUCT_ID)
+        # Print
+        p.image(frame, center=True)
+
+        try:
+            p.cut()
+        except Exception as e:
+            print(f"Cutting the paper is not supported: {e}")
+
+        p.close()
+
+
+if __name__ == "__main__":
+    print_image()
