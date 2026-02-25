@@ -79,7 +79,7 @@ def create_polaroid(img: Image.Image, text: str | None = None) -> Image.Image:
 VENDOR_ID = 0x0485
 PRODUCT_ID = 0x5741
 
-def print_image(file_path):
+def print_image(file_path=None):
 
     if not file_path:
         img = Image.open("static/people.jpg")
