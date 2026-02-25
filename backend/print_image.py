@@ -94,7 +94,7 @@ def print_image(file_path):
     full_text = "".join([(f"{text}") for i in range(num_lines)])
 
     save_image = True
-    print_image = False
+    print_image = True
 
     img = resize_img(img)
     if not file_path:
