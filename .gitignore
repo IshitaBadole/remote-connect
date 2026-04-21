@@ -10,6 +10,7 @@ backend/__pycache__/
 backend/*.pyc
 backend/venv/
 backend/env/
+backend/output
 
 # --- Frontend (Flutter) ---
 frontend/.dart_tool/
