@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// const String baseUrl = 'http://10.0.0.177:8000';
-const String baseUrl = 'http://10.181.53.31:8000';
+const String baseUrl = String.fromEnvironment('BACKEND_URL', defaultValue: 'http://localhost:8000');
 
 class ElementField {
   final String type;
