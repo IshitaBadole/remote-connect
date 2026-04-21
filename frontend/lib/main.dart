@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/api.dart';
 import 'package:frontend/form_page.dart';
+import 'package:frontend/onboarding_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Care Connect',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -42,9 +44,28 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
+
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        fontFamily: 'IBMPlexMono',
+        textTheme: const TextTheme(
+          displayLarge:   TextStyle(fontFamily: 'IBMPlexMono'),
+          displayMedium:  TextStyle(fontFamily: 'IBMPlexMono'),
+          displaySmall:   TextStyle(fontFamily: 'IBMPlexMono'),
+          headlineLarge:  TextStyle(fontFamily: 'IBMPlexMono'),
+          headlineMedium: TextStyle(fontFamily: 'IBMPlexMono'),
+          headlineSmall:  TextStyle(fontFamily: 'IBMPlexMono'),
+          titleLarge:     TextStyle(fontFamily: 'IBMPlexMono'),
+          titleMedium:    TextStyle(fontFamily: 'IBMPlexMono'),
+          titleSmall:     TextStyle(fontFamily: 'IBMPlexMono'),
+          bodyLarge:      TextStyle(fontFamily: 'IBMPlexMono'),
+          bodyMedium:     TextStyle(fontFamily: 'IBMPlexMono'),
+          bodySmall:      TextStyle(fontFamily: 'IBMPlexMono'),
+          labelLarge:     TextStyle(fontFamily: 'IBMPlexMono'),
+          labelMedium:    TextStyle(fontFamily: 'IBMPlexMono'),
+          labelSmall:     TextStyle(fontFamily: 'IBMPlexMono'),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Home'),
     );
   }
 }
@@ -76,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // This "listens" for the Magic Link click from the email
-    supabase.auth.onAuthStateChange.listen((data) {
+    supabase.auth.onAuthStateChange.listen((data) async {
       if(!mounted) return;
 
       final AuthChangeEvent event = data.event;
@@ -86,18 +107,41 @@ class _MyHomePageState extends State<MyHomePage> {
       if (session != null &&
           (event == AuthChangeEvent.signedIn ||
               event == AuthChangeEvent.initialSession)) {
-        // 2. Use pushReplacement so they can't 'Go Back' to the login screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const UploadPage()),
-        );
+        // 2. Check profile — new users go to onboarding, returning users go to gallery
+        final profile = await fetchProfile();
+        if (!mounted) return;
+        if (profile == null || profile['role'] == null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const OnboardingPage()),
+          );
+        } else {
+          final role = profile['role'] as String?;
+          final name = profile['name'] as String?;
+          if (role == null || name == null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const OnboardingPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TemplateGalleryPage(
+                  userRole: role,
+                  userName: name,
+                ),
+              ),
+            );
+          }
+        }
       } else if (event == AuthChangeEvent.signedOut) {
         // 3. If they log out, wipe the screen and go back to Login
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                const MyHomePage(title: 'Flutter Demo Home Page'),
+                const MyHomePage(title: 'Home'),
           ),
           (route) => false,
         );
@@ -113,7 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       if (!_codeSent) {
         // STEP 1: SEND THE CODE
-        await supabase.auth.signInWithOtp(email: _emailController.text.trim());
+        await supabase.auth.signInWithOtp(
+          email: _emailController.text.trim(),
+          emailRedirectTo: 'http://localhost:3000/',
+        );
         setState(() => _codeSent = true); // Now show the OTP input field
       } else {
         // STEP 2: VERIFY THE CODE typed by the user
