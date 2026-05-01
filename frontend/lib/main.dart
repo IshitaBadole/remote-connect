@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // STEP 1: SEND THE CODE
         await supabase.auth.signInWithOtp(
           email: _emailController.text.trim(),
-          emailRedirectTo: 'http://localhost:3000/',
+          emailRedirectTo: 'io.supabase.remote-connect://login-callback',
         );
         setState(() => _codeSent = true); // Now show the OTP input field
       } else {
