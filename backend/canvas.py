@@ -258,7 +258,7 @@ class Canvas:
         self.strips.append(strip)
 
     def add_mood_tracker(self, name):
-        moods = ["emotion_sad", "emotion_upset", "emotion_happy"]
+        moods = ["emotion_sad", "emotion_okay", "emotion_happy"]
         icon_size = 56
         row_height = 70
         date_col_width = 110
