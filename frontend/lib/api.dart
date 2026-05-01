@@ -5,7 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const String baseUrl = String.fromEnvironment('BACKEND_URL', defaultValue: 'http://localhost:8000');
+const String baseUrl = String.fromEnvironment(
+  'BACKEND_URL',
+  defaultValue: 'http://localhost:8000',
+);
 
 class ElementField {
   final String type;
@@ -123,7 +126,7 @@ Future<void> generatePrint({
   request.fields['to_name'] = toName;
   request.fields['from_name'] = fromName;
   request.fields['save_image'] = 'true';
-  request.fields['do_print'] = 'false';
+  request.fields['do_print'] = 'true';
 
   final token = Supabase.instance.client.auth.currentSession?.accessToken ?? '';
   if (token.isNotEmpty) request.headers['Authorization'] = 'Bearer $token';
